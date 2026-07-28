@@ -60,4 +60,7 @@ function saveFeedback(feedback) {
 
 }
 
-mod
+module.exports = {
+    initializeDatabase,
+    saveFeedback
+};
