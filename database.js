@@ -1,134 +1,63 @@
 "use strict";
 
-const sqlite3 = require("sqlite3").verbose();
+const { Low } = require("lowdb");
+const { JSONFile } = require("lowdb/node");
 
-const db = new sqlite3.Database("./feedback.db", (err) => {
+const file = "./feedback.json";
+const adapter = new JSONFile(file);
+const defaultData = { feedback: [] };
+const db = new Low(adapter, defaultData);
 
-    if (err) {
+async function initializeDatabase() {
 
-        console.error("Unable to open database:", err.message);
+    await db.read();
 
-    } else {
+    db.data ||= defaultData;
 
-        console.log("Connected to feedback.db");
+    await db.write();
 
-    }
-
-});
-
-function initializeDatabase() {
-
-    db.run(
-        `
-        CREATE TABLE IF NOT EXISTS feedback (
-
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            fullName TEXT,
-
-            email TEXT,
-
-            dashboard TEXT NOT NULL,
-
-            ui INTEGER,
-
-            ux INTEGER,
-
-            completeness INTEGER,
-
-            accuracy INTEGER,
-
-            accessibility INTEGER,
-
-            suggestion TEXT,
-
-            datasetRows INTEGER,
-
-            columns TEXT,
-
-            submittedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-
-        )
-        `,
-        (err) => {
-
-            if (err) {
-
-                console.error("Table creation failed:", err.message);
-
-            } else {
-
-                console.log("Feedback table ready.");
-
-            }
-
-        }
-    );
+    console.log("Feedback store ready (feedback.json).");
 
 }
 
 function saveFeedback(feedback) {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
 
-        db.run(
-            `
-            INSERT INTO feedback (
+        try {
 
-                fullName,
-                email,
-                dashboard,
-                ui,
-                ux,
-                completeness,
-                accuracy,
-                accessibility,
-                suggestion,
-                datasetRows,
-                columns
+            await db.read();
 
-            )
+            const newEntry = {
+                id: db.data.feedback.length + 1,
+                fullName: feedback.fullName,
+                email: feedback.email,
+                dashboard: feedback.dashboard,
+                ui: feedback.ui,
+                ux: feedback.ux,
+                completeness: feedback.completeness,
+                accuracy: feedback.accuracy,
+                accessibility: feedback.accessibility,
+                suggestion: feedback.suggestion,
+                datasetRows: feedback.datasetRows,
+                columns: JSON.stringify(feedback.columns),
+                submittedAt: new Date().toISOString()
+            };
 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `,
-            [
+            db.data.feedback.push(newEntry);
 
-                feedback.fullName,
-                feedback.email,
-                feedback.dashboard,
-                feedback.ui,
-                feedback.ux,
-                feedback.completeness,
-                feedback.accuracy,
-                feedback.accessibility,
-                feedback.suggestion,
-                feedback.datasetRows,
-                JSON.stringify(feedback.columns)
+            await db.write();
 
-            ],
+            resolve({ id: newEntry.id });
 
-            function (err) {
+        } catch (err) {
 
-                if (err) {
+            reject(err);
 
-                    reject(err);
-                    return;
-
-                }
-
-                resolve({
-                    id: this.lastID
-                });
-
-            }
-
-        );
+        }
 
     });
 
 }
 
-module.exports = {
-    initializeDatabase,
-    saveFeedback
-};
+mod
