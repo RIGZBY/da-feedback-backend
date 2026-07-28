@@ -1,5 +1,15 @@
 {
+  "name": "da-feedback-backend",
+  "version": "1.0.0",
+  "description": "Backend server for DA feedback submissions",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "axios": "^1.18.1"
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "axios": "^1.7.7",
+    "sqlite3": "^5.1.7"
   }
 }
