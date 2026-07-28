@@ -4,7 +4,8 @@
   "description": "Backend server for DA feedback submissions",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "npm rebuild sqlite3 --build-from-source"
   },
   "dependencies": {
     "express": "^4.19.2",
